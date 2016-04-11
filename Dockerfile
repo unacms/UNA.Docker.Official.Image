@@ -38,9 +38,10 @@ USER trident
 
 WORKDIR /var/www/html
 
-ENV TRIDENT_VERSION 8.0.0
+ENV TRIDENT_VERSION 8.0.1
 
-RUN curl -fSL "https://github.com/boonex/trident/releases/download/${TRIDENT_VERSION}/Trident-v.${TRIDENT_VERSION}.zip" -o trident.zip \
+# Alternative download URL - https://github.com/boonex/trident/releases/download/${TRIDENT_VERSION}/Trident-v.${TRIDENT_VERSION}.zip
+RUN curl -fSL "http://ci.boonex.com/builds/Trident-v.${TRIDENT_VERSION}.zip" -o trident.zip \
  && unzip -o trident.zip \
  && rm trident.zip \
  && mv Trident-v.${TRIDENT_VERSION}/* . \
@@ -54,7 +55,7 @@ RUN chmod 777 inc cache cache_public logs tmp storage \
 
 USER root
 
-RUN echo "memory_limit=190M \n\
+RUN echo "memory_limit=192M \n\
 post_max_size=100M \n\
 upload_max_filesize=100M \n\
 error_log=/var/www/php_error.log \n\
