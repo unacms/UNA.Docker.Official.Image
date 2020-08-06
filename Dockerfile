@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
         libjpeg62-turbo-dev \
         libmcrypt-dev \
         libpng-dev \
+        libonig-dev \
         sendmail sendmail-bin \
         unzip \
  && docker-php-ext-install -j$(nproc) exif \
