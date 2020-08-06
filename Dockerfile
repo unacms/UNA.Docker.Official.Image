@@ -1,7 +1,7 @@
-# Trident docker file
+# Container OS should have PHP and Apache already
 FROM php:5-apache
 
-MAINTAINER dev@boonex.com
+MAINTAINER at@una.io
 
 # PHP extensions and necessary packages
 RUN apt-get update && apt-get install -y \
@@ -25,28 +25,27 @@ RUN apt-get update && apt-get install -y \
  && docker-php-ext-install -j$(nproc) zip \
  && rm -rf /var/lib/apt/lists/*
 
-# User folder 
+# User & folder 
 
-RUN groupadd -r --gid 2483 trident \
- && useradd -r --uid 2483 -g trident trident
-
-RUN chown trident:trident /var/www/html /var/www
+RUN groupadd -r --gid 2483 www-una \
+ && useradd -r --uid 2483 -g www-una www-una \
+ && chown www-una:www-una /var/www/html /var/www
 
 # Unzip package
 
-USER trident
+USER www-una
 
 WORKDIR /var/www/html
 
-ENV TRIDENT_VERSION 8.0.1
+ENV UNA_VERSION 11.0.2
 
-# Alternative download URL - https://github.com/boonex/trident/releases/download/${TRIDENT_VERSION}/Trident-v.${TRIDENT_VERSION}.zip
-RUN curl -fSL "http://ci.boonex.com/builds/Trident-v.${TRIDENT_VERSION}.zip" -o trident.zip \
- && unzip -o trident.zip \
- && rm trident.zip \
- && mv Trident-v.${TRIDENT_VERSION}/* . \
- && mv Trident-v.${TRIDENT_VERSION}/.htaccess . \
- && rm -rf "Trident-v.${TRIDENT_VERSION}" 
+# Alternative download URL - https://github.com/unaio/una/releases/download/${UNA_VERSION}/UNA-v.${UNA_VERSION}.zip
+RUN curl -fSL "http://ci.una.io/builds/UNA-v.${UNA_VERSION}.zip" -o una.zip \
+ && unzip -o una.zip \
+ && rm una.zip \
+ && mv UNA-v.${UNA_VERSION}/* . \
+ && mv UNA-v.${UNA_VERSION}/.htaccess . \
+ && rm -rf "UNA-v.${UNA_VERSION}" 
 
 RUN chmod 777 inc cache cache_public logs tmp storage \
  && chmod +x plugins/ffmpeg/ffmpeg.exe
@@ -63,10 +62,10 @@ error_reporting=E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT \n\
 display_errors=Off \n\
 log_errors=On \n\
 sendmail_path=/usr/sbin/sendmail -t -i \n\
-date.timezone=UTC" > /var/www/php.ini && chown trident:trident /var/www/php.ini
+date.timezone=UTC" > /var/www/php.ini && chown www-una:www-una /var/www/php.ini
 
 RUN touch /var/www/php_error.log \
- && chown trident:trident /var/www/php_error.log \
+ && chown www-una:www-una /var/www/php_error.log \
  && chmod 666 /var/www/php_error.log
 
 RUN echo "<VirtualHost *:80> \n\
@@ -74,16 +73,15 @@ RUN echo "<VirtualHost *:80> \n\
         PHPINIDir /var/www \n\
         ErrorLog /var/www/error.log \n\
         CustomLog /var/www/access.log combined \n\
-</VirtualHost>" > /etc/apache2/sites-enabled/trident.conf
+</VirtualHost>" > /etc/apache2/sites-enabled/una.conf
 
 RUN a2enmod rewrite expires
 
 # Crontab
 
-RUN echo "* * * * * php -c /var/www /var/www/html/periodic/cron.php" > /var/www/crontab
-
-RUN chown trident:trident /var/www/crontab \
- && crontab -u trident /var/www/crontab 
+RUN echo "* * * * * php -c /var/www /var/www/html/periodic/cron.php" > /var/www/crontab \
+ && chown www-una:www-una /var/www/crontab \
+ && crontab -u www-una /var/www/crontab 
 
 # Expose port
 
