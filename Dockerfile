@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
         sendmail sendmail-bin \
         unzip \
  && docker-php-ext-install -j$(nproc) exif \
- && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ ---with-png=/usr/include/ \
+ && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ --with-png=/usr/include/\ \
  && docker-php-ext-install -j$(nproc) gd \
  && docker-php-ext-install -j$(nproc) iconv \
  && docker-php-ext-install -j$(nproc) mbstring \
