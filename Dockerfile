@@ -19,7 +19,6 @@ RUN apt-get update && apt-get install -y \
  && docker-php-ext-install -j$(nproc) gd \
  && docker-php-ext-install -j$(nproc) iconv \
  && docker-php-ext-install -j$(nproc) mbstring \
- && docker-php-ext-install -j$(nproc) mysql \
  && docker-php-ext-install -j$(nproc) opcache \
  && docker-php-ext-install -j$(nproc) pdo \
  && docker-php-ext-install -j$(nproc) pdo_mysql \
