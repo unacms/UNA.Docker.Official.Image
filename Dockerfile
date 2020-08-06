@@ -1,5 +1,5 @@
 # Container OS should have PHP and Apache already
-FROM php:5-apache
+FROM php:7.4-apache
 
 MAINTAINER at@una.io
 
