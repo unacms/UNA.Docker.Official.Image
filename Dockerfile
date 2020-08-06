@@ -11,19 +11,23 @@ RUN apt-get update && apt-get install -y \
         libmcrypt-dev \
         libpng-dev \
         libonig-dev \
+        libmagickwand-dev \
         sendmail sendmail-bin \
         unzip \
  && docker-php-ext-install -j$(nproc) exif \
- && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
+ && docker-php-ext-configure gd --with-freetype --with-jpeg; \
  && docker-php-ext-install -j$(nproc) gd \
  && docker-php-ext-install -j$(nproc) iconv \
  && docker-php-ext-install -j$(nproc) mbstring \
- && docker-php-ext-install -j$(nproc) mcrypt \
  && docker-php-ext-install -j$(nproc) mysql \
  && docker-php-ext-install -j$(nproc) opcache \
  && docker-php-ext-install -j$(nproc) pdo \
  && docker-php-ext-install -j$(nproc) pdo_mysql \
  && docker-php-ext-install -j$(nproc) zip \
+ && pecl install mcrypt-1.0.3 \
+ && docker-php-ext-enable mcrypt \
+ && pecl install imagick-3.4.4 \
+ && docker-php-ext-enable imagick \
  && rm -rf /var/lib/apt/lists/*
 
 # User & folder 
