@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
         libpng-dev \
         libonig-dev \
         libmagickwand-dev \
-        libzzip-dev \
+        libzip-dev \
         sendmail sendmail-bin \
         unzip \
  && docker-php-ext-install -j$(nproc) exif \
