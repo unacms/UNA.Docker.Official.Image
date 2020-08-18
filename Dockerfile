@@ -42,7 +42,7 @@ USER www-una
 
 WORKDIR /var/www/html
 
-ENV UNA_VERSION 11.0.2
+ENV UNA_VERSION 11.0.3
 
 # Alternative download URL - https://github.com/unaio/una/releases/download/${UNA_VERSION}/UNA-v.${UNA_VERSION}.zip
 RUN curl -fSL "http://ci.una.io/builds/UNA-v.${UNA_VERSION}.zip" -o una.zip \
