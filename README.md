@@ -19,7 +19,7 @@ Above example assumes that UNA is run locally with mysql server installed on the
 - `UNA_DB_NAME` - MySQL database name, **required** 
 - `UNA_DB_USER` - MySQL database user, default - `root`
 - `UNA_DB_PWD` - MySQL database user, default - `root`
-- `UNA_HTTP_HOST` - UNA hostname, if other that `80` port is used, then it need to be specified here, for example `localhost:8000`, default - `localhost` 
+- `UNA_HTTP_HOST` - UNA hostname, if other than `80` port is used, then it need to be specified here, for example `localhost:8000`, default - `localhost` 
 - `UNA_SITE_TITLE` - new site title, default - `UNA`
 - `UNA_SITE_EMAIL` - new site email, to send mail from, default - `admin@example.com`
 - `UNA_ADMIN_USERNAME` - admin username, default - `admin`
