@@ -13,6 +13,7 @@ VAR_DEF_DB_PWD="root"
 VAR_DEF_HTTP_HOST="localhost"
 VAR_DEF_TITLE="UNA"
 VAR_DEF_USERNAME="admin"
+VAR_DEF_ADMIN_PWD="admin"
 VAR_DEF_EMAIL="admin@example.com"
 
 VAR_DEF_VERSION="11.0.3"
@@ -56,7 +57,7 @@ if [ -d "install" ] && [ ! -f "inc/header.inc.php" ]; then
         --site_email='${UNA_SITE_EMAIL:-$VAR_DEF_EMAIL}' \
         --admin_username='${UNA_ADMIN_USERNAME:-$VAR_DEF_USERNAME}' \
         --admin_email='${UNA_ADMIN_EMAIL:-$VAR_DEF_EMAIL}' \
-        --admin_password='${UNA_ADMIN_PWD}' \
+        --admin_password='${UNA_ADMIN_PWD:-$VAR_DEF_ADMIN_PWD}' \
         --oauth_key='${UNA_KEY:-}' --oauth_secret='${UNA_SECRET:-}'"
 
     rm -rf ./install

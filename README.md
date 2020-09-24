@@ -24,7 +24,7 @@ Above example assumes that UNA is run locally with mysql server installed on the
 - `UNA_SITE_EMAIL` - new site email, to send mail from, default - `admin@example.com`
 - `UNA_ADMIN_USERNAME` - admin username, default - `admin`
 - `UNA_ADMIN_EMAIL` - admin login email, default - `admin@example.com`
-- `UNA_ADMIN_PWD` - admin password, default - `localhost`
+- `UNA_ADMIN_PWD` - admin password, default - `admin`
 - `UNA_KEY` - UNA key, key&secret can be generated on [una.io website](https://una.io/page/kands-manage)
 - `UNA_SECRET` - UNA secret
 - `UNA_VERSION` - particular UNA version to install, default - latest version
