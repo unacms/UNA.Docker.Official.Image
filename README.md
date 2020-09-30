@@ -31,3 +31,5 @@ Above example assumes that UNA is run locally with mysql server installed on the
 - `UNA_ZIP_DOWNLOAD_URL` - custom UNA download URL, in case you need to install modified version, optional
 - `UNA_ZIP_FOLDER` - custom UNA folder in `UNA_ZIP_DOWNLOAD_URL` zip to be able to unpack, UNA is aleays installed in root folder 
 - `UNA_NO_CRONTAB` - don't install crontab, in case of multiple instances, cron should be installed on one instance only, cron is installed by default
+- `UNA_DB_ENGINE` - MySQL DB engine, please note that some DB engines require custom MySQL server configuration, default `MYISAM` 
+- `UNA_AUTO_HOSTNAME` - when this option is set (other than zero) then `UNA_HTTP_HOST` option is ignored and current hostname (where site is requested) is used. 

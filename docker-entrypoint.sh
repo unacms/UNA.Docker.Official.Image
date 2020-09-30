@@ -1,8 +1,6 @@
 #!/bin/bash
 set -euox pipefail
 
-# TODO: escape vars
-
 UNA_USER="www-una"
 
 VAR_DEF_DB_HOST="localhost"
@@ -14,6 +12,9 @@ VAR_DEF_TITLE="UNA"
 VAR_DEF_USERNAME="admin"
 VAR_DEF_ADMIN_PWD="admin"
 VAR_DEF_EMAIL="admin@example.com"
+
+VAR_DEF_DB_ENGINE="MYISAM"
+VAR_DEF_AUTO_HOSTNAME=0
 
 VAR_DEF_VERSION="11.0.3"
 VAR_DEF_ZIP_DOWNLOAD_URL="http://ci.una.io/builds/UNA-v.${UNA_VERSION:-$VAR_DEF_VERSION}.zip"
@@ -66,6 +67,16 @@ if [ -d "install" ] && [ ! -f "inc/header.inc.php" ]; then
         --oauth_key=$(qs ${UNA_KEY:-}) --oauth_secret=$(qs ${UNA_SECRET:-})"
 
     rm -rf ./install
+fi
+
+# Config alteration
+
+if [ ${UNA_DB_ENGINE:-$VAR_DEF_DB_ENGINE} != "MYISAM" ]; then
+    sed -r -i "s/^define\('BX_DATABASE_ENGINE', 'MYISAM'\);/define\('BX_DATABASE_ENGINE', '${UNA_DB_ENGINE:-$VAR_DEF_DB_ENGINE}'\);/g" /var/www/html/inc/header.inc.php
+fi
+
+if [ ${UNA_AUTO_HOSTNAME:-$VAR_DEF_AUTO_HOSTNAME} != 0 ]; then
+    sed -r -i "s/^define\('BX_DOL_URL_ROOT', .*?;/define\('BX_DOL_URL_ROOT', \(\(isset\(\$_SERVER['HTTPS']\) \&\& \$_SERVER['HTTPS'] == 'on'\) || \(!empty\(\$_SERVER['HTTP_X_FORWARDED_PROTO']\) \&\& \$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty\(\$_SERVER['HTTP_X_FORWARDED_SSL']\) \&\& \$_SERVER['HTTP_X_FORWARDED_SSL'] == 'on'\) ? 'https' : 'http'\) . ':\/\/' . \$_SERVER['HTTP_HOST'] . '\/'\);/g" /var/www/html/inc/header.inc.php
 fi
 
 # Crontab
