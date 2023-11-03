@@ -55,7 +55,7 @@ log_errors=On \n\
 sendmail_path=/usr/sbin/sendmail -t -i \n\
 date.timezone=UTC" > /var/www/php.ini && chown www-una:www-una /var/www/php.ini
 
-RUN mkdir /var/log/php /var/www/ssl && chown www-una:www-una /var/log/php && chmod 777 /var/log/php && su www-una -c "ln -s /dev/stderr /var/log/php/error.log"
+RUN mkdir /var/log/php && mkdir /var/www/ssl && chown www-una:www-una /var/log/php && chmod 777 /var/log/php && su www-una -c "ln -s /dev/stderr /var/log/php/error.log"
 
 RUN echo "<VirtualHost *:80> \n\
         DocumentRoot /var/www/html \n\
