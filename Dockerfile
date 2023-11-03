@@ -1,5 +1,5 @@
 # Container OS should have PHP and Apache already
-FROM php:7.4-apache
+FROM php:8.2-apache
 
 MAINTAINER at@una.io
 
@@ -13,13 +13,14 @@ RUN apt-get update && apt-get install -y \
         libjpeg62-turbo-dev \
         libmcrypt-dev \
         libpng-dev \
+        libwebp-dev \
         libonig-dev \
         libmagickwand-dev \
         libzip-dev \
         sendmail sendmail-bin \
         unzip \
  && docker-php-ext-install -j$(nproc) exif \
- && docker-php-ext-configure gd --with-freetype --with-jpeg \
+ && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
  && docker-php-ext-install -j$(nproc) gd \
  && docker-php-ext-install -j$(nproc) iconv \
  && docker-php-ext-install -j$(nproc) mbstring \
@@ -27,9 +28,9 @@ RUN apt-get update && apt-get install -y \
  && docker-php-ext-install -j$(nproc) pdo \
  && docker-php-ext-install -j$(nproc) pdo_mysql \
  && docker-php-ext-install -j$(nproc) zip \
- && pecl install mcrypt-1.0.3 \
+ && pecl install mcrypt-1.0.6 \
  && docker-php-ext-enable mcrypt \
- && pecl install imagick-3.4.4 \
+ && pecl install imagick \
  && docker-php-ext-enable imagick \
  && rm -rf /var/lib/apt/lists/*
 
