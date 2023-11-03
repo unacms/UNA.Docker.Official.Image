@@ -55,16 +55,29 @@ log_errors=On \n\
 sendmail_path=/usr/sbin/sendmail -t -i \n\
 date.timezone=UTC" > /var/www/php.ini && chown www-una:www-una /var/www/php.ini
 
-RUN mkdir /var/log/php && chown www-una:www-una /var/log/php && chmod 777 /var/log/php && su www-una -c "ln -s /dev/stderr /var/log/php/error.log"
+RUN mkdir /var/log/php /var/www/ssl && chown www-una:www-una /var/log/php && chmod 777 /var/log/php && su www-una -c "ln -s /dev/stderr /var/log/php/error.log"
 
 RUN echo "<VirtualHost *:80> \n\
         DocumentRoot /var/www/html \n\
         PHPINIDir /var/www \n\
         ErrorLog /var/www/error.log \n\
         CustomLog /var/www/access.log combined \n\
-</VirtualHost>" > /etc/apache2/sites-enabled/una.conf
+</VirtualHost>" > /etc/apache2/sites-available/una_http.conf; \
+echo "<VirtualHost *:443> \n\
+        Alias /.well-known /var/www/html/.well-known \n\
+        SSLCertificateFile /var/www/ssl/cert.pem \n\
+        SSLCertificateKeyFile /var/www/ssl/privkey.pem \n\
+        SSLCertificateChainFile /var/www/ssl/fullchain.pem \n\
+        SSLEngine on \n\
+        Protocols h2 http/1.1 \n\
+        DocumentRoot /var/www/html \n\
+        PHPINIDir /var/www \n\
+        ErrorLog /var/www/error.log \n\
+        CustomLog /var/www/access.log combined \n\
+</VirtualHost>" > /etc/apache2/sites-available/una_https.conf; \
+ln -s /etc/apache2/sites-available/una_http.conf /etc/apache2/sites-enabled/una_http.conf
 
-RUN a2enmod rewrite expires
+RUN a2enmod rewrite expires ssl
 
 # Expose port and set volume
 
