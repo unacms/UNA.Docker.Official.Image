@@ -63,6 +63,9 @@ RUN echo "<VirtualHost *:80> \n\
         ErrorLog /var/www/error.log \n\
         CustomLog /var/www/access.log combined \n\
 </VirtualHost>" > /etc/apache2/sites-available/una_http.conf; \
+RUN echo "<VirtualHost *:80> \n\
+        Redirect permanent / "https://%{HTTP_HOST}" \n\
+</VirtualHost>" > /etc/apache2/sites-available/una_http_redir.conf; \
 echo "<VirtualHost *:443> \n\
         Alias /.well-known /var/www/html/.well-known \n\
         SSLCertificateFile /var/www/ssl/cert.pem \n\
@@ -76,6 +79,7 @@ echo "<VirtualHost *:443> \n\
         CustomLog /var/www/access.log combined \n\
 </VirtualHost>" > /etc/apache2/sites-available/una_https.conf; \
 ln -s /etc/apache2/sites-available/una_http.conf /etc/apache2/sites-enabled/una_http.conf
+# ln -s /etc/apache2/sites-available/una_https.conf /etc/apache2/sites-enabled/una_https.conf; ln -s /etc/apache2/sites-available/una_http_redir.conf /etc/apache2/sites-enabled/una_http_redir.conf 
 
 RUN a2enmod rewrite expires ssl
 
