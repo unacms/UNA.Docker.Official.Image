@@ -63,8 +63,10 @@ RUN echo "<VirtualHost *:80> \n\
         ErrorLog /var/www/error.log \n\
         CustomLog /var/www/access.log combined \n\
 </VirtualHost>" > /etc/apache2/sites-available/una_http.conf; \
-RUN echo "<VirtualHost *:80> \n\
-        Redirect permanent / "https://%{HTTP_HOST}" \n\
+echo "<VirtualHost *:80> \n\
+        RewriteEngine On \n\
+        RewriteCond %{HTTPS} !=on \n\
+        RewriteRule ^/(.*) https://%{SERVER_NAME}/\$1 [R,L] \n\
 </VirtualHost>" > /etc/apache2/sites-available/una_http_redir.conf; \
 echo "<VirtualHost *:443> \n\
         Alias /.well-known /var/www/html/.well-known \n\
