@@ -44,7 +44,7 @@ rm -rf cache/* cache_public/* tmp/*
 # Change permissions
 
 chmod +x plugins/ffmpeg/ffmpeg.exe
-find . -exec chown $UNA_USER:$UNA_USER {} \+
+find . -exec chown $UNA_USER:$UNA_USER {} \+ || true
 
 # Install
 
