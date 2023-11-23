@@ -22,8 +22,14 @@ VAR_DEF_ZIP_FOLDER="UNA-v.${UNA_VERSION:-$VAR_DEF_VERSION}"
 
 # function
 
-qs() { 
-    echo ${1@Q}
+qs() {
+    if [[ $1 = /run/secrets/* ]]
+    then
+        result=`cat $1`
+        echo ${result@Q}
+    else
+        echo ${1@Q}
+    fi
 }
 
 # Unzip
