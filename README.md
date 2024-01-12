@@ -6,7 +6,7 @@ This is the official git repository for UNA. Refer to [Docker Hub page](https://
 ## How to use this image
 
 ```
-docker run -e "UNA_DB_HOST=host.docker.internal" -e "UNA_DB_NAME=test" -e "UNA_ADMIN_PWD=5ecret" -d -p 80:80 --name una unaio/una:latest
+docker run -e "UNA_DB_HOST=host.docker.internal" -e "UNA_DB_NAME=test" -e "UNA_ADMIN_PWD=5ecret" --add-host=host.docker.internal:host-gateway -d -p 80:80 --name una unaio/una:latest
 ```
 
 Above example assumes that UNA is run locally with mysql server installed on the host machine. After the run UNA should be accessible using `http://localhost` URL, you can login with `admin@example.com` email and   `5ecret` password.
