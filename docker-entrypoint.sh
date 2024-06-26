@@ -85,6 +85,10 @@ if [ ${UNA_AUTO_HOSTNAME:-$VAR_DEF_AUTO_HOSTNAME} != 0 ]; then
     sed -r -i "s/^define\('BX_DOL_URL_ROOT', .*?;/define\('BX_DOL_URL_ROOT', \(\(isset\(\$_SERVER['HTTPS']\) \&\& \$_SERVER['HTTPS'] == 'on'\) || \(!empty\(\$_SERVER['HTTP_X_FORWARDED_PROTO']\) \&\& \$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty\(\$_SERVER['HTTP_X_FORWARDED_SSL']\) \&\& \$_SERVER['HTTP_X_FORWARDED_SSL'] == 'on'\) ? 'https' : 'http'\) . ':\/\/' . \$_SERVER['HTTP_HOST'] . '\/'\);/g" /var/www/html/inc/header.inc.php
 fi
 
+# Apache config alteration - fix permanent redirect
+
+sed -r -i "s/\/ \[R,L\]/\/\$1 [R,L]/g" /etc/apache2/sites-available/000-default.conf
+
 # Crontab
 
 if [[ ! -v UNA_NO_CRONTAB ]]; then
