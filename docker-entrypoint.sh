@@ -87,7 +87,7 @@ fi
 
 # Apache config alteration - fix permanent redirect
 
-sed -r -i "s/\/ \[R,L\]/\/\$1 [R,L]/g" /etc/apache2/sites-available/000-default.conf
+sed -r -i "s/\/ \[R,L\]/\/\$1 [L,R=301]/g" /etc/apache2/sites-available/000-default.conf
 
 # Crontab
 
