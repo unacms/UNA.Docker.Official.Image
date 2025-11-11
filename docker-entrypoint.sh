@@ -55,6 +55,12 @@ find . -exec chown $UNA_USER:$UNA_USER {} \+ || true
 # Install
 
 if [ -d "install" ] && [ ! -f "inc/header.inc.php" ]; then
+
+    if [ -f /tmp/addon.sql ]; then
+        echo "Found additional SQL file..."
+        cat /tmp/addon.sql >> ./install/sql/addon.sql
+    fi
+
     su $UNA_USER -c "php ./install/cmd.php \
         --db_host=$(qs ${UNA_DB_HOST:-$VAR_DEF_DB_HOST}) \
         --db_port=$(qs ${UNA_DB_PORT:-$VAR_DEF_DB_PORT}) \
