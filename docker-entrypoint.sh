@@ -1,24 +1,5 @@
 #!/bin/bash
-set -euox pipefail
-
-UNA_USER="www-una"
-
-VAR_DEF_DB_HOST="localhost"
-VAR_DEF_DB_PORT="3306"
-VAR_DEF_DB_USER="root"
-VAR_DEF_DB_PWD="root"
-VAR_DEF_HTTP_HOST="localhost"
-VAR_DEF_TITLE="UNA"
-VAR_DEF_USERNAME="admin"
-VAR_DEF_ADMIN_PWD="admin"
-VAR_DEF_EMAIL="admin@example.com"
-
-VAR_DEF_DB_ENGINE="MYISAM"
-VAR_DEF_AUTO_HOSTNAME=0
-
-VAR_DEF_VERSION="14.0.0"
-VAR_DEF_ZIP_DOWNLOAD_URL="http://ci.una.io/builds/UNA-v.${UNA_VERSION:-$VAR_DEF_VERSION}.zip"
-VAR_DEF_ZIP_FOLDER="UNA-v.${UNA_VERSION:-$VAR_DEF_VERSION}"
+set -eo pipefail
 
 # function
 
@@ -34,18 +15,34 @@ qs() {
 
 # Unzip
 
-if [ ! -e "index.php" ] && [ ! -e "inc/version.inc.php" ]; then
-    su $UNA_USER -c "curl -fSL $(qs ${UNA_ZIP_DOWNLOAD_URL:-$VAR_DEF_ZIP_DOWNLOAD_URL}) -o una.zip"
-    su $UNA_USER -c "unzip -o una.zip"
-    su $UNA_USER -c "rm una.zip"
-    su $UNA_USER -c "mv $(qs ${UNA_ZIP_FOLDER:-$VAR_DEF_ZIP_FOLDER})/* ."
-    su $UNA_USER -c "mv $(qs ${UNA_ZIP_FOLDER:-$VAR_DEF_ZIP_FOLDER}/.htaccess) ."
-    su $UNA_USER -c "rm -rf $(qs ${UNA_ZIP_FOLDER:-$VAR_DEF_ZIP_FOLDER})"
+if [ -n "${UNA_ZIP_DOWNLOAD_URL:-}" ] && [ -n "${UNA_ZIP_FOLDER:-}" ] && \
+   [ ! -e "index.php" ] && [ ! -e "inc/version.inc.php" ]; then
+
+    su "$UNA_USER" -c "
+        set -eo pipefail;
+
+        if [ \"${UNA_FOLDER_CLEANUP}\" = \"1\" ]; then
+            find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +;
+        fi;
+
+        curl -fSL \"${UNA_ZIP_DOWNLOAD_URL}\" -o una.zip;
+        unzip -q una.zip;
+        rm una.zip;
+
+        mv \"${UNA_ZIP_FOLDER}\"/* .;
+        mv \"${UNA_ZIP_FOLDER}/.htaccess\" .;
+        rm -rf \"${UNA_ZIP_FOLDER}\";
+
+        chmod 777 inc cache cache_public logs tmp storage;
+        chmod +x plugins/ffmpeg/ffmpeg.exe;
+
+        // find storage -exec chmod $UNA_USER:$UNA_USER {} \+ 
+    "
 fi
 
 # Clean folders
 
-rm -rf cache/* cache_public/* tmp/*
+rm -rf cache/* cache_public/* tmp/* 
 
 # Change permissions
 
@@ -60,6 +57,8 @@ if [ -d "install" ] && [ ! -f "inc/header.inc.php" ]; then
         echo "Found additional SQL file..."
         cat /tmp/addon.sql >> ./install/sql/addon.sql
     fi
+
+    \cp -f /srv/header.inc.php install/patterns/ # make sure that old UNA version can work with ENV vars
 
     su $UNA_USER -c "php ./install/cmd.php \
         --db_host=$(qs ${UNA_DB_HOST:-$VAR_DEF_DB_HOST}) \
@@ -81,16 +80,6 @@ if [ -d "install" ] && [ ! -f "inc/header.inc.php" ]; then
     rm -rf ./install
 fi
 
-# Config alteration
-
-if [ ${UNA_DB_ENGINE:-$VAR_DEF_DB_ENGINE} != "MYISAM" ]; then
-    sed -r -i "s/^define\('BX_DATABASE_ENGINE', 'MYISAM'\);/define\('BX_DATABASE_ENGINE', '${UNA_DB_ENGINE:-$VAR_DEF_DB_ENGINE}'\);/g" /var/www/html/inc/header.inc.php
-fi
-
-if [ ${UNA_AUTO_HOSTNAME:-$VAR_DEF_AUTO_HOSTNAME} != 0 ]; then
-    sed -r -i "s/^define\('BX_DOL_URL_ROOT', .*?;/define\('BX_DOL_URL_ROOT', \(\(isset\(\$_SERVER['HTTPS']\) \&\& \$_SERVER['HTTPS'] == 'on'\) || \(!empty\(\$_SERVER['HTTP_X_FORWARDED_PROTO']\) \&\& \$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty\(\$_SERVER['HTTP_X_FORWARDED_SSL']\) \&\& \$_SERVER['HTTP_X_FORWARDED_SSL'] == 'on'\) ? 'https' : 'http'\) . ':\/\/' . \$_SERVER['HTTP_HOST'] . '\/'\);/g" /var/www/html/inc/header.inc.php
-fi
-
 # Crontab
 
 if [[ ! -v UNA_NO_CRONTAB ]]; then
@@ -98,7 +87,6 @@ if [[ ! -v UNA_NO_CRONTAB ]]; then
     chown $UNA_USER:$UNA_USER /var/www/crontab
     crontab -u $UNA_USER /var/www/crontab
 
-    rm -f /etc/cron.d/sendmail
     /etc/init.d/cron start
 fi
 
