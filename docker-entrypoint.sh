@@ -3,6 +3,30 @@ set -eo pipefail
 
 # function
 
+file_env() {
+    local var="$1"
+    local fileVar="${var}_FILE"
+
+    if [ -n "${!var:-}" ] && [ -n "${!fileVar:-}" ]; then
+        echo "Both $var and $fileVar are set, but are exclusive"
+        exit 1
+    fi
+
+    local val=""
+
+    if [ -n "${!var:-}" ]; then
+        val="${!var}"
+    elif [ -n "${!fileVar:-}" ]; then
+        val="$(< "${!fileVar}")"
+    fi
+
+    if [ -n "$val" ]; then
+        export "$var"="$val"
+    fi
+
+    unset "$fileVar"
+}
+
 qs() {
     if [[ $1 = /run/secrets/* ]]
     then
@@ -12,6 +36,15 @@ qs() {
         echo ${1@Q}
     fi
 }
+
+# expand secrets
+
+file_env UNA_DB_PWD
+file_env UNA_ADMIN_PWD
+file_env UNA_KEY
+file_env UNA_SECRET
+file_env UNA_HASH_SECRET
+file_env UNA_DEBUG_COOKIE
 
 # Unzip
 
@@ -36,7 +69,8 @@ if [ -n "${UNA_ZIP_DOWNLOAD_URL:-}" ] && [ -n "${UNA_ZIP_FOLDER:-}" ] && \
         chmod 777 inc cache cache_public logs tmp storage;
         chmod +x plugins/ffmpeg/ffmpeg.exe;
 
-        // find storage -exec chmod $UNA_USER:$UNA_USER {} \+ 
+        find storage -type f -exec chmod 666 {} \+; 
+        find storage -type d -exec chmod 777 {} \+; 
     "
 fi
 
@@ -75,9 +109,8 @@ if [ -d "install" ] && [ ! -f "inc/header.inc.php" ]; then
         --admin_username=$(qs ${UNA_ADMIN_USERNAME:-$VAR_DEF_USERNAME}) \
         --admin_email=$(qs ${UNA_ADMIN_EMAIL:-$VAR_DEF_EMAIL}) \
         --admin_password=$(qs ${UNA_ADMIN_PWD:-$VAR_DEF_ADMIN_PWD}) \
-        --oauth_key=$(qs ${UNA_KEY:-}) --oauth_secret=$(qs ${UNA_SECRET:-})"
-
-    rm -rf ./install
+        --oauth_key=$(qs ${UNA_KEY:-}) --oauth_secret=$(qs ${UNA_SECRET:-})" \
+        && rm -rf ./install
 fi
 
 # Crontab
@@ -107,39 +140,6 @@ EOF
 
     a2enconf 99-subfolder
 fi
-
-# expand secrets
-
-file_env() {
-    local var="$1"
-    local fileVar="${var}_FILE"
-
-    if [ -n "${!var:-}" ] && [ -n "${!fileVar:-}" ]; then
-        echo "Both $var and $fileVar are set, but are exclusive"
-        exit 1
-    fi
-
-    local val=""
-
-    if [ -n "${!var:-}" ]; then
-        val="${!var}"
-    elif [ -n "${!fileVar:-}" ]; then
-        val="$(< "${!fileVar}")"
-    fi
-
-    if [ -n "$val" ]; then
-        export "$var"="$val"
-    fi
-
-    unset "$fileVar"
-}
-
-file_env UNA_DB_PWD
-file_env UNA_ADMIN_PWD
-file_env UNA_KEY
-file_env UNA_SECRET
-file_env UNA_HASH_SECRET
-file_env UNA_DEBUG_COOKIE
 
 #
 
