@@ -2,7 +2,9 @@
 
 FROM php:8.3-apache AS builder
 
-MAINTAINER at@una.io
+LABEL org.opencontainers.image.authors="at@unacms.com" \
+      org.opencontainers.image.description="UNA PHP application" \
+      org.opencontainers.image.vendor="UNACMS"
 
 USER root
 
