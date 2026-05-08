@@ -7,7 +7,7 @@ if (isset($_ENV['UNA_HTTP_HOST']) || isset($_ENV['UNA_AUTO_HOSTNAME'])) {
         ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
          ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
         ? 'https://' : 'http://'
-        . ($_ENV['UNA_HTTP_HOST'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost') . '/'
+        . ($_ENV['UNA_HTTP_HOST'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost') . '/' . ($_ENV['UNA_HTTP_PATH'] ?? '')
     );
 }
 else {
