@@ -90,6 +90,24 @@ if [[ ! -v UNA_NO_CRONTAB ]]; then
     /etc/init.d/cron start
 fi
 
+# subdir config
+
+if [ -n "$UNA_HTTP_PATH" ]; then
+    echo "Creating Alias for $UNA_HTTP_PATH"
+
+    cat > "/etc/apache2/conf-available/99-subfolder.conf" <<EOF
+Alias /${UNA_HTTP_PATH} /var/www/html/
+
+<Directory /var/www/html/>
+    Require all granted
+    AllowOverride All
+    Options FollowSymLinks
+</Directory>
+EOF
+
+    a2enconf 99-subfolder
+fi
+
 #
 
 exec "$@"
