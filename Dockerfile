@@ -67,8 +67,8 @@ ENV UNA_USER="www-una" \
         VAR_DEF_DB_ENGINE="MYISAM" \
         VAR_DEF_AUTO_HOSTNAME=0 \
         VAR_DEF_VERSION="14.0.0" \
-        APACHE_RUN_USER=$UNA_USER \
-        APACHE_RUN_GROUP=$UNA_USER
+        APACHE_RUN_USER="www-una" \
+        APACHE_RUN_GROUP="www-una"
 
 # User & folder 
 
