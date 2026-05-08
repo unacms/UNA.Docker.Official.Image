@@ -108,6 +108,39 @@ EOF
     a2enconf 99-subfolder
 fi
 
+# expand secrets
+
+file_env() {
+    local var="$1"
+    local fileVar="${var}_FILE"
+
+    if [ -n "${!var:-}" ] && [ -n "${!fileVar:-}" ]; then
+        echo "Both $var and $fileVar are set, but are exclusive"
+        exit 1
+    fi
+
+    local val=""
+
+    if [ -n "${!var:-}" ]; then
+        val="${!var}"
+    elif [ -n "${!fileVar:-}" ]; then
+        val="$(< "${!fileVar}")"
+    fi
+
+    if [ -n "$val" ]; then
+        export "$var"="$val"
+    fi
+
+    unset "$fileVar"
+}
+
+file_env UNA_DB_PWD
+file_env UNA_ADMIN_PWD
+file_env UNA_KEY
+file_env UNA_SECRET
+file_env UNA_HASH_SECRET
+file_env UNA_DEBUG_COOKIE
+
 #
 
 exec "$@"

@@ -32,7 +32,7 @@ if (isset($_ENV['UNA_DATABASE_PERSISTENT'])) {
 
 define('BX_SYSTEM_JAVA', $_ENV['UNA_JAVA_PATH'] ?? '%JAVA_PATH%'); ///< path to java binary
 define('BX_SYSTEM_FFMPEG', $_ENV['UNA_FFMPEG_PATH'] ?? '%FFMPEG_PATH%'); ///< path to ffmpeg binary
-define('BX_DOL_SECRET', $_ENV['UNA_SECRET'] ?? '%SECRET%'); ///< secret word
+define('BX_DOL_SECRET', $_ENV['UNA_HASH_SECRET'] ?? '%SECRET%'); ///< secret word
 
 define('BX_DB_FULL_VISUAL_PROCESSING', $_ENV['UNA_DEBUG_VISUAL_PROCESSING'] ?? true); ///< upon db error - show error message
 define('BX_DB_FULL_DEBUG_MODE', $_ENV['UNA_DEBUG_MODE'] ?? false); ///< upon db error - show detailed report (turn off in production mode)
