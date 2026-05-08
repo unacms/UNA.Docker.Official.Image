@@ -53,7 +53,7 @@ COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 # ENV vars
 
 ENV UNA_USER="www-una" \
-        UNA_ROOT_DIR="/var/www/html" \
+        UNA_ROOT_DIR="/var/www/html/" \
         UNA_JAVA_PATH="" \
         VAR_DEF_DB_HOST="localhost" \
         VAR_DEF_DB_PORT="3306" \
