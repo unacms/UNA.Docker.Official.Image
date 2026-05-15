@@ -4,9 +4,9 @@ define('BX_DOL', 1);
 
 if (isset($_ENV['UNA_HTTP_HOST']) || isset($_ENV['UNA_AUTO_HOSTNAME'])) {
     define('BX_DOL_URL_ROOT',
-        ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+        (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
          ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
-        ? 'https://' : 'http://'
+        ? 'https://' : 'http://')
         . ($_ENV['UNA_HTTP_HOST'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost') . '/' . ($_ENV['UNA_HTTP_PATH'] ?? '')
     );
 }
