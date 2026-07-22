@@ -27,16 +27,6 @@ file_env() {
     unset "$fileVar"
 }
 
-qs() {
-    if [[ $1 = /run/secrets/* ]]
-    then
-        result=`cat $1`
-        echo ${result@Q}
-    else
-        echo ${1@Q}
-    fi
-}
-
 # expand secrets
 
 file_env UNA_DB_PWD
@@ -69,14 +59,14 @@ if [ -n "${UNA_ZIP_DOWNLOAD_URL:-}" ] && [ -n "${UNA_ZIP_FOLDER:-}" ] && \
         chmod 777 inc cache cache_public logs tmp storage;
         chmod +x plugins/ffmpeg/ffmpeg.exe;
 
-        find storage -type f -exec chmod 666 {} \+; 
-        find storage -type d -exec chmod 777 {} \+; 
+        find storage -type f -exec chmod 666 {} \+;
+        find storage -type d -exec chmod 777 {} \+;
     "
 fi
 
 # Clean folders
 
-rm -rf cache/* cache_public/* tmp/* 
+rm -rf cache/* cache_public/* tmp/*
 
 # Change permissions
 
@@ -94,23 +84,32 @@ if [ -d "install" ] && [ ! -f "inc/header.inc.php" ]; then
 
     \cp -f /srv/header.inc.php install/patterns/ # make sure that old UNA version can work with ENV vars
 
-    su $UNA_USER -c "php ./install/cmd.php \
-        --db_host=$(qs ${UNA_DB_HOST:-$VAR_DEF_DB_HOST}) \
-        --db_port=$(qs ${UNA_DB_PORT:-$VAR_DEF_DB_PORT}) \
-        --db_sock=$(qs ${UNA_DB_SOCK:-}) \
-        --db_name=$(qs ${UNA_DB_NAME}) \
-        --db_user=$(qs ${UNA_DB_USER:-$VAR_DEF_DB_USER}) \
-        --db_password=$(qs ${UNA_DB_PWD:-$VAR_DEF_DB_PWD}) \
-        --server_http_host=$(qs ${UNA_HTTP_HOST:-$VAR_DEF_HTTP_HOST}) \
-        --server_php_self='/install/index.php' \
-        --server_doc_root='/var/www/html/' \
-        --site_title=$(qs ${UNA_SITE_TITLE:-$VAR_DEF_TITLE}) \
-        --site_email=$(qs ${UNA_SITE_EMAIL:-$VAR_DEF_EMAIL}) \
-        --admin_username=$(qs ${UNA_ADMIN_USERNAME:-$VAR_DEF_USERNAME}) \
-        --admin_email=$(qs ${UNA_ADMIN_EMAIL:-$VAR_DEF_EMAIL}) \
-        --admin_password=$(qs ${UNA_ADMIN_PWD:-$VAR_DEF_ADMIN_PWD}) \
-        --oauth_key=$(qs ${UNA_KEY:-}) --oauth_secret=$(qs ${UNA_SECRET:-})" \
-        && rm -rf ./install
+    INSTALL_CMD=(
+        php ./install/cmd.php
+        --db_host="${UNA_DB_HOST:-$VAR_DEF_DB_HOST}"
+        --db_port="${UNA_DB_PORT:-$VAR_DEF_DB_PORT}"
+        --db_name="$UNA_DB_NAME"
+        --db_user="${UNA_DB_USER:-$VAR_DEF_DB_USER}"
+        --db_password="${UNA_DB_PWD:-$VAR_DEF_DB_PWD}"
+        --server_http_host="${UNA_HTTP_HOST:-$VAR_DEF_HTTP_HOST}"
+        --server_php_self="/install/index.php"
+        --server_doc_root="/var/www/html/"
+        --site_title="${UNA_SITE_TITLE:-$VAR_DEF_TITLE}"
+        --site_email="${UNA_SITE_EMAIL:-$VAR_DEF_EMAIL}"
+        --admin_username="${UNA_ADMIN_USERNAME:-$VAR_DEF_USERNAME}"
+        --admin_email="${UNA_ADMIN_EMAIL:-$VAR_DEF_EMAIL}"
+        --admin_password="${UNA_ADMIN_PWD:-$VAR_DEF_ADMIN_PWD}"
+        --oauth_key="${UNA_KEY:-}"
+        --oauth_secret="${UNA_SECRET:-}"
+    )
+
+    if command -v runuser >/dev/null; then
+        runuser -u "$UNA_USER" -- "${INSTALL_CMD[@]}"
+    else
+        su "$UNA_USER" -c "$(printf '%q ' "${INSTALL_CMD[@]}")"
+    fi
+
+    rm -rf ./install
 fi
 
 # Crontab
