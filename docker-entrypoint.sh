@@ -43,34 +43,18 @@ mkdir -p $MAINTENANCE_DIR
 chmod 777 $MAINTENANCE_DIR
 echo '' > $MAINTENANCE_DIR/status.txt
 chmod 666 $MAINTENANCE_DIR/status.txt
-cat > $MAINTENANCE_DIR/index.php <<'EOF'
+cat > $MAINTENANCE_DIR/index.php <<EOF
 <?php
 http_response_code(503);
 header('Retry-After: 10');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 header('Pragma: no-cache');
-
-if (str_contains($_SERVER['REQUEST_URI'], 'status')) {
-    $file = '/tmp/maintenance/status.txt';
-    if (is_file($file)) {
-        header('Content-Type: text/plain');
-        readfile($file);
-        exit;
-    }
-}
-
 header('Content-Type: text/html; charset=utf-8');
 ?>
 <h1>🚀 Starting UNA...</h1>
-<p id="status"></p>
+<p><?php readfile('$MAINTENANCE_DIR/status.txt'); ?></p>
 <script>
-    setTimeout(()=>location.reload(), 3000);
-    var f = async () => {
-    	let r = await fetch('status.txt', { cache: 'no-store' });
-    	document.getElementById('status').innerHTML = await r.text();
-    };
-    setTimeout(f, 0);
-    setInterval(f, 1000);
+    setTimeout(()=>location.reload(), 2000);
 </script>
 EOF
 
