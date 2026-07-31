@@ -41,12 +41,24 @@ file_env UNA_DEBUG_COOKIE
 MAINTENANCE_DIR="/tmp/maintenance"
 mkdir -p $MAINTENANCE_DIR
 chmod 777 $MAINTENANCE_DIR
+echo '' > $MAINTENANCE_DIR/status.txt
+chmod 666 $MAINTENANCE_DIR/status.txt
 cat > $MAINTENANCE_DIR/index.php <<'EOF'
 <?php
 http_response_code(503);
 header('Retry-After: 10');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 header('Pragma: no-cache');
+
+if (str_contains($_SERVER['REQUEST_URI'], 'status')) {
+    $file = '/tmp/maintenance/status.txt';
+    if (is_file($file)) {
+        header('Content-Type: text/plain');
+        readfile($file);
+        exit;
+    }
+}
+
 header('Content-Type: text/html; charset=utf-8');
 ?>
 <h1>🚀 Starting UNA...</h1>
@@ -62,7 +74,7 @@ header('Content-Type: text/html; charset=utf-8');
 </script>
 EOF
 
-php -S 0.0.0.0:80 -t $MAINTENANCE_DIR &
+php -S 0.0.0.0:80 $MAINTENANCE_DIR/index.php &
 PID_PHP=$!
 
 # Unzip
