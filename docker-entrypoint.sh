@@ -36,6 +36,35 @@ file_env UNA_SECRET
 file_env UNA_HASH_SECRET
 file_env UNA_DEBUG_COOKIE
 
+# Mainenance page 
+
+MAINTENANCE_DIR="/tmp/maintenance"
+mkdir -p $MAINTENANCE_DIR
+chmod 777 $MAINTENANCE_DIR
+cat > $MAINTENANCE_DIR/index.php <<'EOF'
+<?php
+http_response_code(503);
+header('Retry-After: 10');
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Pragma: no-cache');
+header('Content-Type: text/html; charset=utf-8');
+?>
+<h1>🚀 Starting UNA...</h1>
+<p id="status"></p>
+<script>
+    setTimeout(()=>location.reload(), 3000);
+    var f = async () => {
+    	let r = await fetch('status.txt', { cache: 'no-store' });
+    	document.getElementById('status').innerHTML = await r.text();
+    };
+    setTimeout(f, 0);
+    setInterval(f, 1000);
+</script>
+EOF
+
+php -S 0.0.0.0:80 -t $MAINTENANCE_DIR &
+PID_PHP=$!
+
 # Unzip
 
 if [ -n "${UNA_ZIP_DOWNLOAD_URL:-}" ] && [ -n "${UNA_ZIP_FOLDER:-}" ] && \
@@ -44,9 +73,13 @@ if [ -n "${UNA_ZIP_DOWNLOAD_URL:-}" ] && [ -n "${UNA_ZIP_FOLDER:-}" ] && \
     su "$UNA_USER" -c "
         set -eo pipefail;
 
+        echo 'Downloading...' > $MAINTENANCE_DIR/status.txt
+
         if [ \"${UNA_FOLDER_CLEANUP}\" = \"1\" ]; then
             find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +;
         fi;
+
+        echo 'Unzipping...' > $MAINTENANCE_DIR/status.txt
 
         curl -fSL \"${UNA_ZIP_DOWNLOAD_URL}\" -o una.zip;
         unzip -q una.zip;
@@ -76,6 +109,8 @@ find . -exec chown $UNA_USER:$UNA_USER {} \+ || true
 # Install
 
 if [ -d "install" ] && [ ! -f "inc/header.inc.php" ]; then
+
+    echo 'Installing...' > $MAINTENANCE_DIR/status.txt
 
     if [ -f /tmp/addon.sql ]; then
         echo "Found additional SQL file..."
@@ -139,6 +174,11 @@ EOF
 
     a2enconf 99-subfolder
 fi
+
+# Disable maintenance page
+
+kill $PID_PHP
+wait $PID_PHP || true
 
 #
 
