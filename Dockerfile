@@ -1,6 +1,6 @@
 # ---- Builder ----
 
-FROM php:8.3-apache AS builder
+FROM php:8.5.12-apache AS builder
 
 LABEL org.opencontainers.image.authors="at@unacms.com" \
       org.opencontainers.image.description="UNA PHP application" \
@@ -9,6 +9,7 @@ LABEL org.opencontainers.image.authors="at@unacms.com" \
 USER root
 
 # PHP extensions and necessary packages
+# Note: in PHP 8.5 OPcache is always built into the core, so it is no longer installed separately.
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libfreetype6-dev \
@@ -23,7 +24,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && docker-php-ext-install -j$(nproc) gd \
  && docker-php-ext-install -j$(nproc) iconv \
  && docker-php-ext-install -j$(nproc) mbstring \
- && docker-php-ext-install -j$(nproc) opcache \
  && docker-php-ext-install -j$(nproc) pdo \
  && docker-php-ext-install -j$(nproc) pdo_mysql \
  && docker-php-ext-install -j$(nproc) zip \
@@ -33,13 +33,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # ---- Runtime ----
 
-FROM php:8.3-apache
+FROM php:8.5.12-apache
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     cron \
     libfreetype6 \
     libjpeg62-turbo \
-    libpng16-16 \
+    libpng16-16t64 \
     libwebp7 \
     libonig5 \
     imagemagick \
@@ -47,7 +47,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
  && rm -rf /var/lib/apt/lists/* /tmp/*
 
- # Copy compiled extensions
+# Copy compiled extensions
 
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
@@ -72,19 +72,20 @@ ENV UNA_USER="www-una" \
         APACHE_RUN_USER="www-una" \
         APACHE_RUN_GROUP="www-una"
 
-# User & folder 
+# User & folder
 
 RUN groupadd -r --gid 2483 $UNA_USER \
  && useradd -r --uid 2483 -g $UNA_USER $UNA_USER \
  && chown $UNA_USER:$UNA_USER /var/www/html /var/www
 
-# Apache configuration
+# PHP configuration
+# E_STRICT is deprecated since PHP 8.4, so it is removed from error_reporting.
 
 RUN echo "memory_limit=192M \n\
 post_max_size=100M \n\
 upload_max_filesize=100M \n\
 error_log=/var/log/php/error.log \n\
-error_reporting=E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT \n\
+error_reporting=E_ALL & ~E_NOTICE & ~E_DEPRECATED \n\
 display_errors=Off \n\
 log_errors=On \n\
 date.timezone=UTC" > /usr/local/etc/php/conf.d/una.ini
@@ -107,7 +108,7 @@ RUN set -eux; \
         mv \"UNA-v.${VAR_DEF_VERSION}\"/* . && \
         mv \"UNA-v.${VAR_DEF_VERSION}\"/.htaccess . && \
         rm -rf \"UNA-v.${VAR_DEF_VERSION}\" && \
-        chmod 777 inc cache cache_public logs tmp storage && \        
+        chmod 777 inc cache cache_public logs tmp storage && \
         chmod +x plugins/ffmpeg/ffmpeg.exe && \
         \\cp -f --no-preserve=mode,ownership /srv/header.inc.php install/patterns/ \
     "
